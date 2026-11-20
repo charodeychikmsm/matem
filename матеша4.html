@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>матеша (черепок)</title>
+<style>
+:root{
+  --bg:#0a0c0f; --panel:#12161b; --panel2:#181d24;
+  --line:#232a33; --line2:#2e3742;
+  --txt:#e6e9ee; --dim:#7c8695;
+  --acc:#5eead4; --acc2:#22d3ee;
+  --bad:#f87171; --good:#4ade80;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;
+  background:var(--bg);
+  background-image:radial-gradient(1000px 500px at 50% -5%,#121a22 0%,transparent 70%);
+  color:var(--txt); min-height:100vh;
+  padding:32px 16px 80px; display:flex; justify-content:center;
+  font-size:15px; line-height:1.5; -webkit-font-smoothing:antialiased;
+}
+.app{width:100%;max-width:680px}
+.screen{display:none;animation:fade .2s ease-out}
+.screen.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+.logo{font-size:34px;font-weight:900;letter-spacing:-1.5px;text-align:center;margin-bottom:4px}
+.logo .sub{color:var(--dim);font-weight:400;font-size:20px;letter-spacing:-.5px}
+.tagline{text-align:center;color:var(--dim);font-size:13px;margin-bottom:26px;letter-spacing:.3px}
+
+.wallet{display:flex;gap:8px;margin-bottom:24px}
+.witem{flex:1;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 8px;text-align:center}
+.witem span{display:block;font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px}
+.witem b{font-size:18px;color:var(--acc);font-weight:700;font-variant-numeric:tabular-nums}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:520px){.grid2{grid-template-columns:1fr}}
+
+.card{
+  position:relative;background:var(--panel);border:1px solid var(--line);
+  border-radius:16px;padding:22px 20px;cursor:pointer;color:var(--txt);
+  font-family:inherit;text-align:left;transition:all .18s ease;overflow:hidden;
+}
+.card::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
+  background:linear-gradient(180deg,var(--acc),var(--acc2));opacity:.6;transition:.18s;
+}
+.card:hover::before{opacity:1}
+.card:hover{
+  background:var(--panel2);border-color:var(--line2);transform:translateY(-2px);
+  box-shadow:0 12px 30px -12px rgba(94,234,212,.25);
+}
+.card .ttl{font-size:17px;font-weight:700;margin-bottom:6px}
+.card .desc{font-size:12.5px;color:var(--dim);font-weight:400;line-height:1.4}
+
+.btn{
+  background:var(--panel);border:1px solid var(--line);color:var(--txt);
+  padding:14px 18px;border-radius:12px;font-size:15px;font-family:inherit;
+  font-weight:600;cursor:pointer;transition:.15s;
+}
+.btn:hover:not(:disabled){background:var(--panel2);border-color:var(--line2);transform:translateY(-1px)}
+.btn:disabled{opacity:.5;cursor:default}
+.btn.primary{background:linear-gradient(135deg,var(--acc),var(--acc2));color:#052220;font-weight:800;border:none}
+.btn.primary:hover:not(:disabled){box-shadow:0 10px 26px -8px rgba(94,234,212,.5)}
+.btn.wide{width:100%;margin-top:10px}
+
+.back{background:none;border:none;color:var(--dim);font-size:14px;cursor:pointer;font-family:inherit;padding:6px 0;margin-bottom:18px}
+.back:hover{color:var(--acc)}
+
+.h2{font-size:22px;font-weight:800;margin-bottom:20px;letter-spacing:-.5px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+
+.chips{display:flex;flex-direction:column;gap:10px}
+.chipbtn{
+  padding:16px 20px;border-radius:14px;background:var(--panel);
+  border:1px solid var(--line);cursor:pointer;text-align:left;color:var(--txt);
+  font-size:16px;font-family:inherit;font-weight:600;transition:.15s;
+}
+.chipbtn:hover{border-color:var(--line2);background:var(--panel2);transform:translateX(4px);box-shadow:-4px 0 0 -2px var(--acc)}
+.chipbtn small{display:block;color:var(--dim);font-size:12.5px;margin-top:4px;font-weight:400}
+
+.qtop{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.ghost{background:none;border:none;color:var(--dim);font-size:18px;cursor:pointer;font-family:inherit;padding:4px 8px;border-radius:8px}
+.ghost:hover{color:var(--bad);background:rgba(248,113,113,.08)}
+.progwrap{flex:1;height:6px;background:var(--panel2);border-radius:99px;overflow:hidden}
+.prog{height:100%;width:0;background:linear-gradient(90deg,var(--acc),var(--acc2));transition:width .3s;border-radius:99px}
+.qscore{font-size:15px;font-weight:700;color:var(--acc);min-width:64px;text-align:right;font-variant-numeric:tabular-nums}
+
+.qmeta{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;min-height:28px}
+.chip{font-size:11.5px;background:var(--panel);border:1px solid var(--line);color:var(--dim);padding:5px 10px;border-radius:6px;display:inline-block;letter-spacing:.3px;font-weight:500}
+.chip.lives{border-color:#4a2b2b;color:#fca5a5;background:#1d1315}
+.chip.timer{border-color:#4a3a1b;color:#fcd34d;background:#1d1810}
+.chip.diff-easy{border-color:#1e5a3e;color:var(--good);background:#0d1a14}
+.chip.diff-med{border-color:#4a3a1b;color:#fcd34d;background:#1a1710}
+.chip.diff-hard{border-color:#4a2020;color:var(--bad);background:#1a1010}
+
+.qtext{
+  font-size:16px;line-height:1.65;white-space:pre-wrap;
+  background:var(--panel);border:1px solid var(--line);border-radius:14px;
+  padding:22px;margin-bottom:0px;font-weight:500;
+  font-family:'JetBrains Mono',ui-monospace,'Consolas',monospace;overflow-x:auto;
+}
+
+/* Место для решения */
+#answerArea {
+  margin-top: 20px;
+}
+
+.sol-label { font-size: 13px; color: var(--dim); margin-bottom: 8px; display: block; }
+
+.answerInput{
+  width:100%;padding:15px 18px;font-size:17px;
+  font-family:'JetBrains Mono',ui-monospace,'Consolas',monospace;
+  border-radius:12px;background:var(--panel);border:1px solid var(--line);
+  color:var(--txt);outline:none;transition:.15s;
+}
+.answerInput:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(94,234,212,.12)}
+
+.options{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:460px){.options{grid-template-columns:1fr}}
+.opt{
+  padding:16px;font-size:16px;font-weight:600;border-radius:12px;
+  font-family:'JetBrains Mono',ui-monospace,'Consolas',monospace;
+  color:var(--txt);background:var(--panel);border:1px solid var(--line);
+  cursor:pointer;transition:.15s;
+}
+.opt:hover:not(:disabled){background:var(--panel2);border-color:var(--line2);transform:translateY(-1px)}
+.opt.correct{border-color:var(--good);background:#0f1f17;color:var(--good)}
+.opt.wrong{border-color:var(--bad);background:#201214;color:var(--bad)}
+
+.feedback{margin-top:14px;font-size:14.5px;font-weight:600;line-height:1.6;}
+.feedback.good{background:#0d1a14;border:1px solid #1e5a3e;color:var(--good);padding:12px 16px;border-radius:10px}
+.feedback.bad{background:#1a1010;border:1px solid #5a2020;color:var(--bad);padding:12px 16px;border-radius:10px}
+
+/* Карточки теории */
+.tcard{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px;margin-bottom:16px}
+.tcard h3{font-size:14px;color:var(--acc);margin-bottom:16px;letter-spacing:.4px;font-weight:700;text-transform:uppercase}
+.tcard ul{list-style:none;display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+.tcard li{font-size:14.5px;color:#cfd6df;padding-left:12px;border-left:2px solid var(--line2);font-family:'JetBrains Mono',ui-monospace,'Consolas',monospace;white-space:pre-wrap;line-height:1.6}
+.tcard .ex{padding-left:12px;border-left:2px solid var(--acc);font-family:'JetBrains Mono',ui-monospace,'Consolas',monospace;font-size:14px;color:#a7f3d0;white-space:pre-wrap;line-height:1.6}
+.tcard .ex-label{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;font-family:'Inter',sans-serif;font-weight:700}
+
+.practice{margin-top:26px;padding-top:22px;border-top:1px dashed var(--line)}
+.practice h3{font-size:16px;margin-bottom:14px;color:var(--txt)}
+
+.resBig{font-size:44px;text-align:center;margin:6px 0 14px;color:var(--acc);font-weight:900;letter-spacing:-2px}
+.resTitle{font-size:22px;text-align:center;font-weight:800;margin-bottom:22px}
+.resGrid{display:flex;gap:10px;margin-bottom:16px}
+.resGrid .witem b{font-size:20px}
+.record{text-align:center;padding:14px;border-radius:12px;background:var(--panel);border:1px solid var(--line);margin-bottom:20px;font-size:14px;color:var(--dim)}
+.record b{color:var(--acc)}
+
+/* Черновик (Scratchpad) */
+.scratch-toggle {
+  background: var(--panel); border: 1px solid var(--line); color: var(--dim);
+  padding: 10px 16px; border-radius: 10px; cursor: pointer; width: 100%;
+  text-align: left; font-family: inherit; font-size: 14px; margin-top: 12px;
+  display: flex; justify-content: space-between; align-items: center; transition: .15s;
+}
+.scratch-toggle:hover { border-color: var(--line2); color: var(--txt); }
+.scratch-container {
+  display: none; background: var(--panel); border: 1px solid var(--line);
+  border-radius: 14px; margin-top: 8px; overflow: hidden;
+}
+.scratch-container.open { display: block; }
+.scratch-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 12px; background: var(--panel2); border-bottom: 1px solid var(--line);
+}
+.scratch-tools { display: flex; gap: 6px; }
+.scratch-btn {
+  background: transparent; border: 1px solid transparent; color: var(--dim);
+  padding: 4px 10px; border-radius: 6px; font-size: 12px; cursor: pointer;
+  font-family: inherit; font-weight: 600; transition: .15s;
+}
+.scratch-btn:hover { background: rgba(255,255,255,0.05); color: var(--txt); }
+.scratch-btn.active { background: var(--bg); border-color: var(--line); color: var(--acc); }
+.scratch-content { position: relative; }
+#drawCanvas {
+  display: block; width: 100%; height: 220px; cursor: crosshair; background: var(--bg);
+}
+.scratch-textarea {
+  display: none; width: 100%; height: 220px; background: var(--bg); border: none;
+  color: var(--txt); padding: 16px; font-family: 'JetBrains Mono', monospace;
+  font-size: 15px; resize: vertical; outline: none;
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<section id="s-home" class="screen active">
+  <div class="logo">матеша <span class="sub">(черепок)</span></div>
+  <p class="tagline">алгебра и геометрия — в виде игры</p>
+  <div class="wallet" id="wallet"></div>
+  <div class="grid2">
+    <button class="card" onclick="chooseSubject('alg')">
+      <div class="ttl">Алгебра</div>
+      <div class="desc">Дроби, уравнения, корни, дискриминант</div>
+    </button>
+    <button class="card" onclick="chooseSubject('geo')">
+      <div class="ttl">Геометрия</div>
+      <div class="desc">Углы, площади, треугольники, Фалес</div>
+    </button>
+  </div>
+</section>
+
+<section id="s-mode" class="screen">
+  <button class="back" onclick="goHome()">← В меню</button>
+  <h2 class="h2" id="modeTitle"></h2>
+  <div class="grid2">
+    <button class="card" onclick="setMode('study')">
+      <div class="ttl">Изучение</div>
+      <div class="desc">Формулы и практика без штрафов</div>
+    </button>
+    <button class="card" onclick="setMode('test')">
+      <div class="ttl">Тест</div>
+      <div class="desc">Очки, жизни и рекорды</div>
+    </button>
+  </div>
+</section>
+
+<section id="s-study" class="screen">
+  <button class="back" onclick="show('s-mode')">← Назад</button>
+  <h2 class="h2">Изучение</h2>
+  <div class="grid2">
+    <button class="card" onclick="openTheory(false)">
+      <div class="ttl">Теория</div>
+      <div class="desc">Только формулы и примеры</div>
+    </button>
+    <button class="card" onclick="openTheory(true)">
+      <div class="ttl">Теория + практика</div>
+      <div class="desc">Формулы и примеры с проверкой</div>
+    </button>
+  </div>
+</section>
+
+<section id="s-theory" class="screen">
+  <button class="back" onclick="show('s-study')">← Назад</button>
+  <h2 class="h2" id="theoryTitle"></h2>
+  <div id="theoryBox"></div>
+  <div id="practiceBox" class="practice" style="display:none"></div>
+</section>
+
+<section id="s-wiz" class="screen">
+  <button class="back" onclick="wizBack()">← Назад</button>
+  <h2 class="h2" id="wizTitle"></h2>
+  <div class="chips" id="wizOptions"></div>
+</section>
+
+<section id="s-quiz" class="screen">
+  <div class="qtop">
+    <button class="ghost" onclick="quitQuiz()">×</button>
+    <div class="progwrap"><div class="prog" id="progBar"></div></div>
+    <div class="qscore" id="qScore">0</div>
+  </div>
+  <div class="qmeta">
+    <span class="chip" id="qTopic"></span>
+    <span class="chip" id="qDiff"></span>
+    <span class="chip lives" id="qLives"></span>
+    <span class="chip timer" id="qTimer"></span>
+  </div>
+  
+  <div class="qtext" id="qText"></div>
+
+  <!-- ЧЕРНОВИК -->
+  <button class="scratch-toggle" onclick="toggleScratchpad()" id="scratchToggleBtn">
+    <span>📝 Черновик (рисовать / писать)</span>
+    <span id="scratchChevron">▼</span>
+  </button>
+  <div class="scratch-container" id="scratchContainer">
+    <div class="scratch-header">
+      <div class="scratch-tools">
+        <button class="scratch-btn active" onclick="setScratchMode('draw')" id="btnModeDraw">✏️ Рисовать</button>
+        <button class="scratch-btn" onclick="setScratchMode('text')" id="btnModeText">⌨️ Текст</button>
+      </div>
+      <button class="scratch-btn" onclick="clearScratchpad()">🗑️ Очистить</button>
+    </div>
+    <div class="scratch-content">
+      <canvas id="drawCanvas"></canvas>
+      <textarea id="textCanvas" class="scratch-textarea" placeholder="Пиши здесь вычисления..."></textarea>
+    </div>
+  </div>
+
+  <div id="answerArea" style="margin-top: 20px; padding-top: 20px; border-top: 1px dashed var(--line);"></div>
+  
+  <div class="feedback" id="feedback"></div>
+  <button class="btn primary wide" id="nextBtn" onclick="nextQ()" style="display:none">Дальше →</button>
+</section>
+
+<section id="s-result" class="screen">
+  <div class="resBig" id="resEmoji">!</div>
+  <h2 class="resTitle" id="resTitle"></h2>
+  <div class="resGrid" id="resGrid"></div>
+  <div class="record" id="recordInfo"></div>
+  <div class="grid2">
+    <button class="btn" onclick="replay()">Ещё раз</button>
+    <button class="btn primary" onclick="goHome()">В меню</button>
+  </div>
+</section>
+
+</div>
+
+<script>
+/* ================= УТИЛИТЫ ================= */
+const el = id => document.getElementById(id);
+const rnd = (a,b) => Math.floor(Math.random()*(b-a+1))+a;
+const pick = arr => arr[rnd(0,arr.length-1)];
+const shuffle = a => { for(let i=a.length-1;i>0;i--){const j=rnd(0,i);[a[i],a[j]]=[a[j],a[i]];} return a; };
+const SUP = {2:'²',3:'³',4:'⁴',5:'⁵'};
+const sgn = n => n<0 ? `− ${Math.abs(n)}` : `+ ${n}`;
+function fmt(n){
+  if(Number.isInteger(n)) return String(n);
+  return (Math.round(n*100)/100).toString().replace('.',',');
+}
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  el(id).classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ================= ЧЕРНОВИК ЛОГИКА ================= */
+let canvas, ctx;
+let isDrawing = false;
+
+function initCanvas() {
+  canvas = el('drawCanvas');
+  ctx = canvas.getContext('2d');
+  
+  // Ресайз канваса под контейнер
+  const resizeCanvas = () => {
+    const rect = canvas.parentElement.getBoundingClientRect();
+    if (rect.width > 0 && canvas.width !== rect.width) {
+      // Сохраняем текущий рисунок
+      const tempCanvas = document.createElement('canvas');
+      tempCanvas.width = canvas.width;
+      tempCanvas.height = canvas.height;
+      tempCanvas.getContext('2d').drawImage(canvas, 0, 0);
+      
+      canvas.width = rect.width;
+      canvas.height = 220;
+      
+      // Восстанавливаем рисунок
+      ctx.drawImage(tempCanvas, 0, 0, canvas.width, canvas.height);
+      
+      // Настройки кисти
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.strokeStyle = '#5eead4'; // цвет акцента
+      ctx.lineWidth = 2;
+    }
+  };
+
+  window.addEventListener('resize', resizeCanvas);
+  setTimeout(resizeCanvas, 100);
+
+  // Мышь
+  canvas.addEventListener('mousedown', startDrawing);
+  canvas.addEventListener('mousemove', draw);
+  canvas.addEventListener('mouseup', stopDrawing);
+  canvas.addEventListener('mouseout', stopDrawing);
+
+  // Тач
+  canvas.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    const touch = e.touches[0];
+    const rect = canvas.getBoundingClientRect();
+    startDrawing({ clientX: touch.clientX, clientY: touch.clientY });
+  });
+  canvas.addEventListener('touchmove', (e) => {
+    e.preventDefault();
+    const touch = e.touches[0];
+    const rect = canvas.getBoundingClientRect();
+    draw({ clientX: touch.clientX, clientY: touch.clientY });
+  });
+  canvas.addEventListener('touchend', stopDrawing);
+}
+
+function startDrawing(e) {
+  if (el('drawCanvas').style.display === 'none') return;
+  isDrawing = true;
+  const rect = canvas.getBoundingClientRect();
+  ctx.beginPath();
+  ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+}
+
+function draw(e) {
+  if (!isDrawing) return;
+  const rect = canvas.getBoundingClientRect();
+  ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+  ctx.stroke();
+}
+
+function stopDrawing() {
+  isDrawing = false;
+}
+
+function toggleScratchpad() {
+  const c = el('scratchContainer');
+  const isOpen = c.classList.contains('open');
+  if (isOpen) {
+    c.classList.remove('open');
+    el('scratchChevron').textContent = '▼';
+  } else {
+    c.classList.add('open');
+    el('scratchChevron').textContent = '▲';
+    // Небольшая задержка для отрисовки
+    setTimeout(() => {
+      window.dispatchEvent(new Event('resize'));
+    }, 50);
+  }
+}
+
+function setScratchMode(mode) {
+  if (mode === 'draw') {
+    el('drawCanvas').style.display = 'block';
+    el('textCanvas').style.display = 'none';
+    el('btnModeDraw').classList.add('active');
+    el('btnModeText').classList.remove('active');
+  } else {
+    el('drawCanvas').style.display = 'none';
+    el('textCanvas').style.display = 'block';
+    el('btnModeDraw').classList.remove('active');
+    el('btnModeText').classList.add('active');
+    el('textCanvas').focus();
+  }
+}
+
+function clearScratchpad() {
+  if (ctx && canvas) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+  el('textCanvas').value = '';
+}
+
+// Инициализация при загрузке
+window.addEventListener('DOMContentLoaded', initCanvas);
+
+/* ================= ХРАНИЛИЩЕ ================= */
+const store = {
+  get(){ try{ return JSON.parse(localStorage.getItem('matesha')||'{}'); }catch(e){ return {}; } },
+  set(o){ try{ localStorage.setItem('matesha', JSON.stringify(o)); }catch(e){} }
+};
+function renderWallet(){
+  const s = store.get();
+  el('wallet').innerHTML = `
+    <div class="witem"><span>Всего очков</span><b>${s.total||0}</b></div>
+    <div class="witem"><span>Рекорд</span><b>${s.best||0}</b></div>
+    <div class="witem"><span>Игр</span><b>${s.games||0}</b></div>`;
+}
+
+/* ================= СОСТОЯНИЕ ================= */
+const state = {
+  subject:null, mode:null, practiceOn:false,
+  answerMode:'choice', count:10, grade:8, diff:1,
+  questions:[], idx:0, score:0, correct:0, streak:0, bestStreak:0,
+  lives:3, timer:null, timeLeft:0, answered:false, currentOpts:[]
+};
+
+/* ================= БАНК ЗАДАЧ ================= */
+const GEN = [
+/* ---------- АЛГЕБРА ---------- */
+{id:'lin', sub:'alg', topic:'Линейные уравнения', grades:[5,6,7,8],
+ gen(d){
+   let a,x,b;
+   if(d===0){ a=rnd(2,5); x=rnd(1,9); b=rnd(1,15); }
+   else if(d===1){ a=rnd(2,9); x=pick([-9,-8,-7,-6,-5,-4,-3,-2,-1,1,2,3,4,5,6,7,8,9]); b=rnd(-20,20)||7; }
+   else { a=rnd(3,12); x=rnd(-15,15)||5; b=rnd(-40,40)||11; }
+   const c = a*x+b;
+   return {q:`${a}x ${sgn(b)} = ${c}`, a:x};
+ }},
+
+{id:'lin2', sub:'alg', topic:'Линейные уравнения', grades:[7,8],
+ gen(d){
+   if(d<2){ return {q:'', a:0, skip:true}; }
+   const a=rnd(3,9), x=rnd(-12,12)||4, b=rnd(-15,15)||7;
+   const c=rnd(2,8), e=rnd(-30,30)||9;
+   return {q:`${a}x ${sgn(b)} = ${c}x ${sgn(e)}\nРеши уравнение.`, a:x};
+ }},
+
+{id:'percent', sub:'alg', topic:'Проценты', grades:[5,6,7,8],
+ gen(d){
+   let p,n;
+   if(d===0){ p=pick([10,20,25,50]); n=rnd(1,10)*100; }
+   else if(d===1){ p=pick([5,15,30,40,60,75]); n=rnd(1,20)*50; }
+   else { p=rnd(2,95); n=rnd(50,2000); if(n%2) n++; }
+   return {q:`Сколько составляет ${p}% от ${n}?`, a:+(p*n/100).toFixed(2)};
+ }},
+
+{id:'ops', sub:'alg', topic:'Порядок действий', grades:[5,6,7,8],
+ gen(d){
+   if(d===0){
+     const a=rnd(2,9), b=rnd(2,9), c=rnd(2,9);
+     return {q:`${a} + ${b} · ${c}`, a:a+b*c};
+   } else if(d===1){
+     const a=rnd(3,10), b=rnd(3,10), c=rnd(2,9);
+     return {q:`(${a} + ${b}) · ${c}`, a:(a+b)*c};
+   } else {
+     const a=rnd(3,10), b=rnd(3,10), c=rnd(3,10), d2=rnd(3,10);
+     return {q:`${a} · ${b} + ${c} · ${d2}`, a:a*b+c*d2};
+   }
+ }},
+
+{id:'neg', sub:'alg', topic:'Отрицательные числа', grades:[5,6,7,8],
+ gen(d){
+   if(d===0){
+     const a=rnd(1,9), b=rnd(1,9);
+     return {q:`−${a} + ${b}`, a:-a+b};
+   } else if(d===1){
+     const a=rnd(1,15), b=rnd(1,15);
+     if(rnd(0,1)===0) return {q:`−${a} − (−${b})`, a:-a+b};
+     return {q:`−${a} · (−${b})`, a:a*b};
+   } else {
+     const a=rnd(2,12), b=rnd(2,12), c=rnd(2,10);
+     return {q:`−${a} · ${b} + ${c}`, a:-a*b+c};
+   }
+ }},
+
+{id:'pow', sub:'alg', topic:'Степени', grades:[7,8],
+ gen(d){
+   if(d===0){
+     const b=rnd(2,6);
+     return {q:`${b}${SUP[2]}`, a:b*b};
+   } else if(d===1){
+     const b=rnd(2,5);
+     return {q:`${b}${SUP[3]}`, a:b*b*b};
+   } else {
+     const b=rnd(2,6);
+     return {q:`(−${b})${SUP[2]}`, a:b*b};
+   }
+ }},
+
+{id:'fsum', sub:'alg', topic:'Формулы сокращ. умножения', grades:[7,8],
+ gen(d){
+   if(d===0){
+     const a=rnd(1,2)*10, b=rnd(1,3);
+     return {q:`(${a} + ${b})${SUP[2]}`, a:(a+b)**2, sol:`${a}² + 2·${a}·${b} + ${b}² = ${a*a} + ${2*a*b} + ${b*b} = ${(a+b)**2}`};
+   } else if(d===1){
+     const a=rnd(2,4)*10, b=rnd(1,4);
+     if(rnd(0,1)===0) return {q:`(${a} − ${b})${SUP[2]}`, a:(a-b)**2, sol:`${a}² − 2·${a}·${b} + ${b}² = ${a*a} − ${2*a*b} + ${b*b} = ${(a-b)**2}`};
+     return {q:`${a}${SUP[2]} − ${b}${SUP[2]}`, a:(a-b)*(a+b), sol:`(${a} − ${b})(${a} + ${b}) = ${a-b} · ${a+b} = ${(a-b)*(a+b)}`};
+   } else {
+     const b=rnd(2,5), k=rnd(1,3)*10;
+     return {q:`${k+b}${SUP[2]} − ${k-b}${SUP[2]}`, a:4*k*b, sol:`(${k+b} − (${k-b}))(${k+b} + ${k-b}) = ${2*b} · ${2*k} = ${4*k*b}`};
+   }
+ }},
+
+{id:'sqrtp', sub:'alg', topic:'Квадратные корни', grades:[8],
+ gen(d){
+   let n;
+   if(d===0) n=rnd(2,12);
+   else if(d===1) n=rnd(2,20);
+   else n=rnd(2,30);
+   return {q:`√${n*n}`, a:n};
+ }},
+
+{id:'sqrtmul', sub:'alg', topic:'Квадратные корни', grades:[8],
+ gen(d){
+   if(d===0){
+     const a=rnd(2,5), b=rnd(2,5);
+     return {q:`√${a*a} · √${b*b}`, a:a*b};
+   } else if(d===1){
+     const a=rnd(2,9), b=rnd(2,9);
+     return {q:`√${a*a} · √${b*b}`, a:a*b};
+   } else {
+     const a=rnd(2,9), b=rnd(2,9);
+     return {q:`√${(a*b)*(a*b)} : √${b*b}`, a:a};
+   }
+ }},
+
+{id:'sqrtbtw', sub:'alg', topic:'Квадратные корни', grades:[8],
+ gen(d){
+   let n;
+   if(d===0) n=rnd(10,50);
+   else if(d===1) n=rnd(50,150);
+   else n=rnd(100,250);
+   return {q:`Между какими соседними целыми\nнаходится √${n}?\nВ ответ — МЕНЬШЕЕ число.`, a:Math.floor(Math.sqrt(n)), sol:`${Math.floor(Math.sqrt(n))}² = ${Math.floor(Math.sqrt(n))**2} < ${n} < ${Math.ceil(Math.sqrt(n))}² = ${Math.ceil(Math.sqrt(n))**2}`};
+ }},
+
+{id:'disc', sub:'alg', topic:'Дискриминант', grades:[8],
+ gen(d){
+   let a,b,c;
+   if(d===0){ a=1; b=rnd(-6,6)||5; c=rnd(-6,6)||-2; }
+   else if(d===1){ a=rnd(1,3); b=rnd(-9,9)||5; c=rnd(-9,9)||-2; }
+   else { a=rnd(2,5); b=rnd(-15,15)||7; c=rnd(-20,20)||-3; }
+   return {q:`D для:\n${a}x${SUP[2]} ${sgn(b)}x ${sgn(c)} = 0`, a:b*b-4*a*c, sol:`D = b² − 4ac = (${b})² − 4·${a}·${c} = ${b*b} − ${4*a*c} = ${b*b-4*a*c}`};
+ }},
+
+{id:'quad', sub:'alg', topic:'Квадратные уравнения', grades:[8],
+ gen(d){
+   let r1,r2,mn,mx;
+   if(d===0){ mn=1; mx=6; } else if(d===1){ mn=-9; mx=9; } else { mn=-15; mx=15; }
+   do{ r1=rnd(mn,mx); r2=rnd(mn,mx); } while(r1===r2||r1===0||r2===0);
+   const b=-(r1+r2), c=r1*r2;
+   return {q:`x${SUP[2]} ${sgn(b)}x ${sgn(c)} = 0\nВ ответ — БОЛЬШИЙ корень.`, a:Math.max(r1,r2)};
+ }},
+
+{id:'inc1', sub:'alg', topic:'Неполные кв. уравнения', grades:[8],
+ gen(d){
+   let a,b;
+   if(d===0){ a=1; b=-rnd(2,8); }
+   else if(d===1){ a=rnd(2,5); b=-a*rnd(2,7); }
+   else { a=rnd(2,7); b=-a*rnd(2,10); }
+   return {q:`${a}x${SUP[2]} ${sgn(b)}x = 0\nКорень, не равный нулю?`, a:-b/a};
+ }},
+
+{id:'inc2', sub:'alg', topic:'Неполные кв. уравнения', grades:[8],
+ gen(d){
+   let a,k;
+   if(d===0){ a=1; k=rnd(2,5); }
+   else if(d===1){ a=rnd(2,4); k=rnd(2,7); }
+   else { a=rnd(2,6); k=rnd(3,12); }
+   return {q:`${a}x${SUP[2]} = ${a*k*k}\nПоложительный корень?`, a:k};
+ }},
+
+{id:'ineq', sub:'alg', topic:'Неравенства', grades:[8],
+ gen(d){
+   let a,x0,b;
+   if(d===0){ a=rnd(2,4); x0=rnd(1,6); b=rnd(1,10); }
+   else if(d===1){ a=rnd(2,7); x0=rnd(-5,5)||2; b=rnd(-15,15)||4; }
+   else { a=rnd(2,9); x0=rnd(-10,10)||3; b=rnd(-30,30)||7; }
+   const c = a*x0+b;
+   return {q:`${a}x ${sgn(b)} > ${c}\nНаименьшее целое решение?`, a:x0+1};
+ }},
+
+/* ---------- ГЕОМЕТРИЯ (С ПОДРОБНЫМИ УСЛОВИЯМИ) ---------- */
+{id:'rect', sub:'geo', topic:'Прямоугольник', grades:[5,6,7,8],
+ gen(d){
+   let a,b;
+   if(d===0){ a=rnd(3,9); b=rnd(3,9); }
+   else if(d===1){ a=rnd(3,15); b=rnd(3,15); }
+   else { a=rnd(5,25); b=rnd(5,25); }
+   const isArea = rnd(0,1)===0;
+   return {
+     q: `Прямоугольник.\nСтороны: ${a} и ${b}\n\n${isArea ? 'Найди площадь.' : 'Найди периметр.'}`,
+     a: isArea ? a*b : 2*(a+b)
+   };
+ }},
+
+{id:'sq', sub:'geo', topic:'Квадрат', grades:[5,6,7,8],
+ gen(d){
+   let a;
+   if(d===0) a=rnd(3,9); else if(d===1) a=rnd(3,16); else a=rnd(5,25);
+   const isArea = rnd(0,1)===0;
+   return {
+     q: `Квадрат.\nСторона = ${a}\n\n${isArea ? 'Найди площадь.' : 'Найди периметр.'}`,
+     a: isArea ? a*a : 4*a
+   };
+ }},
+
+{id:'tri_area', sub:'geo', topic:'Площадь треугольника', grades:[5,6,7,8],
+ gen(d){
+   let h,a;
+   if(d===0){ h=rnd(2,6); a=2*rnd(2,6); }
+   else if(d===1){ h=rnd(2,10); a=2*rnd(2,10); }
+   else { h=rnd(3,15); a=2*rnd(3,15); }
+   return {
+     q: `Треугольник.\nОснование = ${a}\nВысота, проведённая к основанию = ${h}\n\nНайди площадь.`,
+     a: a*h/2
+   };
+ }},
+
+{id:'tri_ang', sub:'geo', topic:'Углы треугольника', grades:[5,6,7,8],
+ gen(d){
+   let A,B;
+   if(d===0){ A=rnd(30,70); B=rnd(30,70); }
+   else if(d===1){ A=rnd(20,80); B=rnd(20,80); }
+   else { A=rnd(15,90); B=rnd(15,90); if(A+B>=170) B=170-A; }
+   return {
+     q: `Треугольник.\nДва угла равны ${A}° и ${B}°.\n\nНайди третий угол.`,
+     a: 180-A-B
+   };
+ }},
+
+{id:'trap', sub:'geo', topic:'Трапеция', grades:[8],
+ gen(d){
+   let a,b,h;
+   if(d===0){ a=rnd(2,6); b=rnd(2,6); h=2*rnd(1,3); }
+   else if(d===1){ a=rnd(4,14); b=rnd(4,14); h=2*rnd(1,6); }
+   else { a=rnd(5,25); b=rnd(5,25); h=2*rnd(1,10); }
+   return {
+     q: `Трапеция.\nОснования: ${a} и ${b}\nВысота = ${h}\n\nНайди площадь.`,
+     a: (a+b)/2*h
+   };
+ }},
+
+{id:'rhomb', sub:'geo', topic:'Ромб', grades:[8],
+ gen(d){
+   let d1,d2;
+   if(d===0){ d1=2*rnd(2,4); d2=2*rnd(2,4); }
+   else if(d===1){ d1=2*rnd(2,8); d2=2*rnd(2,8); }
+   else { d1=2*rnd(3,12); d2=2*rnd(3,12); }
+   return {
+     q: `Ромб.\nДиагонали: ${d1} и ${d2}\n\nНайди площадь.`,
+     a: d1*d2/2
+   };
+ }},
+
+{id:'midline', sub:'geo', topic:'Средняя линия Δ', grades:[8],
+ gen(d){
+   let a;
+   if(d===0) a=2*rnd(2,6); else if(d===1) a=2*rnd(3,15); else a=2*rnd(5,25);
+   const findML = rnd(0,1)===0;
+   return {
+     q: `Треугольник.\nСторона = ${a}\n\n${findML ? 'Найди среднюю линию, параллельную этой стороне.' : `Средняя линия = ${a/2}\nНайди параллельную ей сторону.`}`,
+     a: findML ? a/2 : a
+   };
+ }},
+
+{id:'trapmid', sub:'geo', topic:'Средняя линия трапеции', grades:[8],
+ gen(d){
+   let a,b;
+   if(d===0){ a=2*rnd(2,6); b=2*rnd(2,6); }
+   else if(d===1){ a=rnd(4,20); b=a+2*rnd(0,8); }
+   else { a=rnd(5,30); b=a+2*rnd(1,12); }
+   return {
+     q: `Трапеция.\nОснования: ${a} и ${b}\n\nНайди среднюю линию.`,
+     a: (a+b)/2
+   };
+ }},
+
+{id:'poly', sub:'geo', topic:'Многоугольники', grades:[8],
+ gen(d){
+   let n;
+   if(d===0) n=rnd(5,7); else if(d===1) n=rnd(5,10); else n=rnd(5,15);
+   return {
+     q: `Выпуклый ${n}-угольник.\n\nНайди сумму его углов (в градусах).`,
+     a: (n-2)*180
+   };
+ }},
+
+{id:'reg', sub:'geo', topic:'Правильный многоугольник', grades:[8],
+ gen(d){
+   let n;
+   if(d===0) n=pick([3,4,6]); else if(d===1) n=pick([3,4,5,6,8,10]); else n=pick([5,8,9,10,12,15]);
+   return {
+     q: `Правильный ${n}-угольник.\n\nНайди величину одного угла (в градусах).`,
+     a: (n-2)*180/n
+   };
+ }},
+
+{id:'thales', sub:'geo', topic:'Теорема Фалеса', grades:[8],
+ gen(d){
+   let k,a,b;
+   if(d===0){ k=rnd(2,3); a=rnd(2,4); b=rnd(2,4); }
+   else if(d===1){ k=rnd(2,4); a=rnd(2,6); b=rnd(2,6); }
+   else { k=rnd(3,6); a=rnd(2,10); b=rnd(2,10); }
+   const c=a*k;
+   return {
+     q: `Параллельные прямые отсекают на сторонах угла пропорциональные отрезки:\na : b = c : d\n\nИзвестно: a = ${a}, b = ${b}, c = ${c}.\nНайди d.`,
+     a: b*k
+   };
+ }},
+
+{id:'median', sub:'geo', topic:'Медианы треугольника', grades:[8],
+ gen(d){
+   let m;
+   if(d===0) m=3*rnd(2,4); else if(d===1) m=3*rnd(3,8); else m=3*rnd(4,15);
+   return {
+     q: `Треугольник.\nМедиана = ${m}.\nТочка пересечения медиан делит её в отношении 2:1, считая от вершины.\n\nНайди БОЛЬШУЮ часть.`,
+     a: 2*m/3
+   };
+ }},
+
+{id:'parallelogram', sub:'geo', topic:'Параллелограмм', grades:[8],
+ gen(d){
+   let a,h;
+   if(d===0){ a=rnd(3,8); h=rnd(2,5); }
+   else if(d===1){ a=rnd(4,15); h=rnd(2,10); }
+   else { a=rnd(5,25); h=rnd(3,15); }
+   return {
+     q: `Параллелограмм.\nСторона = ${a}\nВысота, проведённая к этой стороне = ${h}\n\nНайди площадь.`,
+     a: a*h
+   };
+ }},
+];
+
+function poolFor(subject, grade){
+  const p = GEN.filter(g => g.sub===subject && (grade==='all' || g.grades.includes(grade)));
+  return p.length ? p : GEN.filter(g => g.sub===subject);
+}
+
+/* ================= ТЕОРИЯ (ВСЕ КЛАССЫ 5-8) ================= */
+const THEORY = {
+alg:[
+ {t:'Обыкновенные дроби (5-6 кл)',
+  f:['Сложение/вычитание: a/c ± b/c = (a ± b)/c','Умножение: a/b · c/d = (a·c)/(b·d)','Деление: a/b : c/d = a/b · d/c'],
+  ex:'2/5 + 1/5 = 3/5\n2/3 · 3/4 = 6/12 = 1/2\n3/4 : 1/2 = 3/4 · 2/1 = 6/4 = 3/2'},
+ {t:'Отрицательные числа (6 кл)',
+  f:['Плюс на минус даёт минус','Минус на минус даёт плюс','a − b = a + (−b)'],
+  ex:'−5 + 3 = −2\n−5 · (−3) = 15\n5 − (−3) = 5 + 3 = 8'},
+ {t:'Линейные уравнения (6-7 кл)',
+  f:['ax + b = c  →  x = (c − b) / a','Члены можно переносить, меняя знак:','ax = c − b'],
+  ex:'3x + 5 = 20\n3x = 20 − 5\n3x = 15\nx = 5'},
+ {t:'Свойства степеней (7 кл)',
+  f:['aᵐ · aⁿ = aᵐ⁺ⁿ','aᵐ : aⁿ = aᵐ⁻ⁿ','(aᵐ)ⁿ = aᵐⁿ','(ab)ⁿ = aⁿ · bⁿ','a⁰ = 1   (a ≠ 0)'],
+  ex:'2³ · 2⁴ = 2⁷ = 128\n(3²)³ = 3⁶ = 729'},
+ {t:'Формулы сокращённого умножения (7 кл)',
+  f:['(a + b)² = a² + 2ab + b²','(a − b)² = a² − 2ab + b²','a² − b² = (a − b)(a + b)'],
+  ex:'(x + 3)² = x² + 6x + 9\n102² − 98² = (102−98)(102+98)\n         = 4 · 200 = 800'},
+ {t:'Квадратные корни (8 кл)',
+  f:['√(a · b) = √a · √b','√(a / b) = √a / √b   (b > 0)','(√a)² = a   (a ≥ 0)','√(a²) = |a|'],
+  ex:'√50 = √(25·2) = 5√2\n√12 · √3 = √36 = 6\n√((-5)²) = |−5| = 5'},
+ {t:'Квадратное уравнение (8 кл)',
+  f:['ax² + bx + c = 0','D = b² − 4ac','D > 0  →  два корня','D = 0  →  один корень','D < 0  →  корней нет','x = (−b ± √D) / (2a)'],
+  ex:'x² − 5x + 6 = 0\na=1, b=−5, c=6\nD = 25 − 24 = 1\nx = (5 ± 1)/2  →  x₁=2, x₂=3'},
+ {t:'Неполные кв. уравнения (8 кл)',
+  f:['ax² + bx = 0  →  x(ax + b) = 0\n   x = 0 или x = −b/a','ax² + c = 0  →  x² = −c/a','ax² = c  →  x = ±√(c/a)'],
+  ex:'3x² − 12x = 0\nx(3x − 12) = 0\nx = 0 или x = 4\n\n2x² = 18\nx² = 9,  x = ±3'},
+ {t:'Неравенства (8 кл)',
+  f:['a > b  ⇒  a + c > b + c','c > 0:  a > b  ⇒  ac > bc','c < 0:  a > b  ⇒  ac < bc\n   (знак переворачивается!)'],
+  ex:'−2x > 10\nx < −5   (знак перевернулся)\n\n3x − 7 > 5\n3x > 12,  x > 4'},
+],
+geo:[
+ {t:'Углы (5-7 кл)',
+  f:['Развёрнутый угол = 180°','Смежные углы в сумме дают 180°','Вертикальные углы равны','Сумма углов треугольника = 180°'],
+  ex:'Смежный с 60° = 120°\nУглы треуг. 50°, 60° → третий = 70°'},
+ {t:'Площади и периметры (5-8 кл)',
+  f:['Квадрат:  S = a²,  P = 4a','Прямоугольник:  S = a · b,  P = 2(a+b)','Треугольник:  S = ½ · a · h','Параллелограмм:  S = a · h','Трапеция:  S = (a + b) / 2 · h','Ромб:  S = (d₁ · d₂) / 2'],
+  ex:'Треугольник: a=10, h=6\nS = ½ · 10 · 6 = 30\n\nТрапеция: a=4, b=8, h=5\nS = (4+8)/2 · 5 = 30'},
+ {t:'Признаки равенства треугольников (7 кл)',
+  f:['1. По двум сторонам и углу между ними','2. По стороне и двум прилежащим углам','3. По трём сторонам'],
+  ex:'Если две стороны и угол между ними\nодного Δ равны двум сторонам и углу\nдругого Δ, то Δ равны.'},
+ {t:'Параллельные прямые (7 кл)',
+  f:['Накрест лежащие углы равны','Соответственные углы равны','Односторонние углы в сумме 180°'],
+  ex:'При параллельных прямых накрест\nлежащие углы равны (например, 45° и 45°).'},
+ {t:'Теорема Фалеса (8 кл)',
+  f:['Параллельные прямые отсекают\nна сторонах угла пропорциональные\nотрезки:','a / b = c / d'],
+  ex:'a=2, b=3, c=6\nd = b·c/a = 3·6/2 = 9'},
+ {t:'Средние линии (8 кл)',
+  f:['Средняя линия треугольника\nпараллельна стороне\nи равна её половине','Средняя линия трапеции\n= (a + b) / 2'],
+  ex:'Сторона Δ = 14 → ср. линия = 7\n\nТрапеция a=6, b=10\nср. линия = (6+10)/2 = 8'},
+ {t:'Медианы (8 кл)',
+  f:['Три медианы пересекаются в одной точке','Эта точка делит каждую медиану\nв отношении 2 : 1, считая от вершины'],
+  ex:'Медиана = 9\nБольшая часть = 9·2/3 = 6\nМеньшая часть = 9·1/3 = 3'},
+ {t:'Многоугольники (8 кл)',
+  f:['Сумма углов n-угольника:  (n − 2) · 180°','Угол правильного n-угольника:\n(n − 2) · 180° / n'],
+  ex:'Пятиугольник (n=5)\nСумма = 3 · 180 = 540°\n\nПравильный 6-угольник\nУгол = 4 · 180 / 6 = 120°'},
+]
+};
+
+/* ================= НАВИГАЦИЯ ================= */
+function goHome(){ clearInterval(state.timer); renderWallet(); show('s-home'); }
+
+function chooseSubject(s){
+  state.subject = s;
+  el('modeTitle').textContent = s==='alg' ? 'Алгебра' : 'Геометрия';
+  show('s-mode');
+}
+
+function setMode(m){
+  state.mode = m;
+  if(m==='study'){ show('s-study'); }
+  else { wizIndex = 0; renderWiz(); show('s-wiz'); }
+}
+
+function openTheory(withPractice){
+  state.practiceOn = withPractice;
+  renderTheory();
+  show('s-theory');
+}
+
+function renderTheory(){
+  const data = THEORY[state.subject];
+  el('theoryTitle').textContent = (state.subject==='alg' ? 'Алгебра' : 'Геометрия') + ' — теория 5-8 класс';
+  el('theoryBox').innerHTML = data.map(c=>`
+    <div class="tcard">
+      <h3>${c.t}</h3>
+      <ul>${c.f.map(x=>`<li>${x}</li>`).join('')}</ul>
+      <div class="ex"><div class="ex-label">Пример</div>${c.ex}</div>
+    </div>`).join('');
+  if(state.practiceOn){
+    el('practiceBox').style.display='block';
+    newPractice();
+  } else {
+    el('practiceBox').style.display='none';
+  }
+}
+
+/* ================= ПРАКТИКА ================= */
+function newPractice(){
+  let pool = poolFor(state.subject,'all');
+  pool = pool.filter(g=>g.id!=='lin2');
+  const g = pick(pool);
+  const q = g.gen(1);
+  if(!q.q){ return newPractice(); }
+  el('practiceBox').innerHTML = `
+    <h3>Практика</h3>
+    <div class="qmeta"><span class="chip">${g.topic}</span></div>
+    <div class="qtext">${escapeHtml(q.q)}</div>
+    <form onsubmit="return checkPractice(event, ${q.a})" style="margin-top:20px; padding-top:20px; border-top:1px dashed var(--line);">
+      <label class="sol-label">Твоё решение:</label>
+      <input class="answerInput" id="pracInput" type="text" inputmode="decimal"
+             autocomplete="off" placeholder="Введи ответ…">
+      <button class="btn primary wide" type="submit">Проверить</button>
+    </form>
+    <div id="pracFb" class="feedback"></div>
+    <button class="btn wide" onclick="newPractice()">Другой пример →</button>
+  `;
+}
+
+function escapeHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function checkPractice(e, ans){
+  e.preventDefault();
+  const raw = el('pracInput').value.replace(/,/g,'.').replace(/[^\d.\-]/g,'');
+  const v = parseFloat(raw);
+  const fb = el('pracFb');
+  if(!isNaN(v) && Math.abs(v-ans) < 0.011){
+    fb.className='feedback good'; fb.textContent='Верно!';
+  } else {
+    fb.className='feedback bad'; fb.textContent='Неверно. Правильный ответ: '+fmt(ans);
+  }
+  return false;
+}
+
+/* ================= МАСТЕР ================= */
+let wizIndex = 0;
+const WIZ = [
+  {key:'answerMode', title:'Как отвечаем?', options:[
+    {v:'input',  l:'Вручную',  d:'Вводим ответ с клавиатуры'},
+    {v:'choice', l:'Варианты', d:'Выбираем из четырёх'}
+  ]},
+  {key:'count', title:'Сколько заданий?', options:[
+    {v:5,l:'5 заданий'},{v:10,l:'10 заданий'},{v:20,l:'20 заданий'}
+  ]},
+  {key:'grade', title:'Темы какого класса?', options:[
+    {v:5,l:'5 класс'},{v:6,l:'6 класс'},{v:7,l:'7 класс'},
+    {v:8,l:'8 класс'},{v:'all',l:'5–8 классы'}
+  ]},
+  {key:'diff', title:'Сложность', options:[
+    {v:0, l:'Легко',  d:'Простые числа, без таймера и жизней'},
+    {v:1, l:'Средне', d:'Больше чисел, 3 жизни'},
+    {v:2, l:'Сложно', d:'Крупные числа, 3 жизни, таймер 40 сек'}
+  ]}
+];
+
+function renderWiz(){
+  const step = WIZ[wizIndex];
+  el('wizTitle').textContent = step.title;
+  el('wizOptions').innerHTML = step.options.map((o, i)=>`
+    <button class="chipbtn" onclick="wizPickIndex(${i})">
+      ${o.l}${o.d?`<small>${o.d}</small>`:''}
+    </button>`).join('');
+}
+
+function wizPickIndex(i){
+  const step = WIZ[wizIndex];
+  state[step.key] = step.options[i].v;
+  
+  if(wizIndex < WIZ.length-1){ 
+    wizIndex++; 
+    renderWiz(); 
+  } else { 
+    startTest(); 
+  }
+}
+
+function wizBack(){
+  if(wizIndex === 0){ show('s-mode'); return; }
+  wizIndex--; renderWiz();
+}
+
+/* ================= ТЕСТ ================= */
+function buildQuestions(){
+  const pool = poolFor(state.subject, state.grade);
+  const list = [];
+  let last = null;
+  let guard = 0;
+  while(list.length < state.count && guard < 500){
+    guard++;
+    const g = pick(pool);
+    if(pool.length > 1 && g === last) continue;
+    let item;
+    try { item = g.gen(state.diff); } catch(e) { continue; }
+    if(!item || !item.q || item.skip) continue;
+    item.topic = g.topic;
+    list.push(item);
+    last = g;
+  }
+  state.questions = list;
+}
+
+function startTest(){
+  buildQuestions();
+  if(!state.questions.length){ goHome(); return; }
+  state.count = state.questions.length;
+  state.idx = 0;
+  state.score = 0;
+  state.correct = 0;
+  state.streak = 0;
+  state.bestStreak = 0;
+  state.lives = 3;
+  
+  // Сбрасываем черновик при старте
+  clearScratchpad();
+  el('scratchContainer').classList.remove('open');
+  el('scratchChevron').textContent = '▼';
+  setScratchMode('draw');
+
+  show('s-quiz');
+  renderQuestion();
+}
+
+function makeOptions(ans){
+  const set = new Set([ans]);
+  let guard = 0;
+  
+  const offsets = Math.abs(ans) >= 100 
+    ? [10, 20, 30, 50, -10, -20, -30, -50, 100, -100]
+    : [1, 2, 3, 4, 5, -1, -2, -3, -4, -5];
+
+  while(set.size < 4 && guard++ < 300){
+    let v;
+    if(Number.isInteger(ans)){
+      v = ans + pick(offsets);
+    } else {
+      v = +(ans + pick([0.1, 0.2, 0.5, -0.1, -0.2, -0.5, 1, -1])).toFixed(2);
+    }
+    if(v !== ans) set.add(v);
+  }
+  return shuffle([...set]);
+}
+
+const DIFF_NAMES = ['Легко','Средне','Сложно'];
+const DIFF_CLS = ['diff-easy','diff-med','diff-hard'];
+
+function renderQuestion(){
+  const q = state.questions[state.idx];
+  state.answered = false;
+
+  el('feedback').className = 'feedback';
+  el('feedback').textContent = '';
+  el('nextBtn').style.display = 'none';
+  el('progBar').style.width = (state.idx / state.count * 100) + '%';
+  el('qScore').textContent = String(state.score);
+  el('qTopic').textContent = q.topic;
+
+  const dc = el('qDiff');
+  dc.textContent = DIFF_NAMES[state.diff];
+  dc.className = 'chip ' + DIFF_CLS[state.diff];
+
+  if(state.diff === 0){
+    el('qLives').style.display = 'none';
+  } else {
+    el('qLives').style.display = 'inline-block';
+    el('qLives').textContent = 'жизни: ' + state.lives;
+  }
+
+  el('qText').textContent = q.q;
+
+  const area = el('answerArea');
+  area.innerHTML = '';
+
+  if(state.answerMode === 'input'){
+    area.innerHTML = `
+      <label class="sol-label">Твоё решение:</label>
+      <form id="ansForm" onsubmit="return submitInput(event)">
+        <input class="answerInput" id="ansInput" type="text" inputmode="decimal"
+               autocomplete="off" placeholder="Введи ответ…">
+        <button class="btn primary wide" type="submit">Проверить</button>
+      </form>`;
+    setTimeout(()=>{ const i = el('ansInput'); if(i) i.focus(); }, 60);
+  } else {
+    state.currentOpts = makeOptions(q.a);
+    const box = document.createElement('div');
+    box.className = 'options';
+    state.currentOpts.forEach((o,i)=>{
+      const b = document.createElement('button');
+      b.className = 'opt';
+      b.textContent = fmt(o);
+      b.onclick = () => submitChoice(i);
+      box.appendChild(b);
+    });
+    area.appendChild(box);
+  }
+
+  startTimer();
+}
+
+function startTimer(){
+  clearInterval(state.timer);
+  const box = el('qTimer');
+  if(state.diff !== 2){ box.style.display = 'none'; return; }
+  box.style.display = 'inline-block';
+  state.timeLeft = 40;
+  box.textContent = 'время: 40';
+  state.timer = setInterval(()=>{
+    state.timeLeft--;
+    box.textContent = 'время: ' + Math.max(0, state.timeLeft);
+    if(state.timeLeft <= 0){
+      clearInterval(state.timer);
+      answerWith(NaN, -1, true);
+    }
+  }, 1000);
+}
+
+function submitInput(e){
+  e.preventDefault();
+  if(state.answered) return false;
+  const raw = el('ansInput').value.replace(/,/g,'.').replace(/[^\d.\-]/g,'');
+  answerWith(parseFloat(raw), -1, false);
+  return false;
+}
+
+function submitChoice(i){
+  if(state.answered) return;
+  answerWith(state.currentOpts[i], i, false);
+}
+
+function answerWith(value, optIdx, timeout){
+  if(state.answered) return;
+  state.answered = true;
+  clearInterval(state.timer);
+
+  const q = state.questions[state.idx];
+  const ok = !isNaN(value) && Math.abs(value - q.a) < 0.011;
+
+  document.querySelectorAll('.opt').forEach(b => b.disabled = true);
+  const inp = el('ansInput');
+  if(inp) inp.disabled = true;
+  const subBtn = document.querySelector('#ansForm button');
+  if(subBtn) subBtn.disabled = true;
+
+  if(state.answerMode === 'choice'){
+    const btns = document.querySelectorAll('.opt');
+    btns.forEach((b,i)=>{
+      if(Math.abs(state.currentOpts[i] - q.a) < 0.011) b.classList.add('correct');
+      else if(i === optIdx) b.classList.add('wrong');
+    });
+  }
+
+  const base = [10,20,30][state.diff];
+  if(ok){
+    state.correct++;
+    state.streak++;
+    if(state.streak > state.bestStreak) state.bestStreak = state.streak;
+    const gain = base + (state.streak - 1) * 5;
+    state.score += gain;
+    el('feedback').className = 'feedback good';
+    el('feedback').textContent = 'Верно! +' + gain +
+      (state.streak > 1 ? '  (серия ' + state.streak + ')' : '');
+  } else {
+    state.streak = 0;
+    if(state.diff > 0) state.lives--;
+    el('feedback').className = 'feedback bad';
+    let fbText = (timeout ? 'Время вышло. ' : 'Неверно. ') + 'Правильный ответ: ' + fmt(q.a);
+    if (q.sol) {
+      fbText += `<br><span style="font-size:13px;opacity:0.8;font-weight:400;margin-top:4px;display:inline-block">Решение: ${q.sol}</span>`;
+    }
+    el('feedback').innerHTML = fbText;
+    if(state.diff > 0) el('qLives').textContent = 'жизни: ' + Math.max(0, state.lives);
+  }
+
+  el('qScore').textContent = String(state.score);
+  const isLast = (state.lives <= 0) || (state.idx + 1 >= state.count);
+  const nb = el('nextBtn');
+  nb.style.display = 'block';
+  nb.textContent = isLast ? 'К результатам' : 'Дальше';
+  nb.focus();
+}
+
+function nextQ(){
+  if(state.lives <= 0 || state.idx + 1 >= state.count){ finish(); return; }
+  
+  // Очищаем черновик при переходе к следующему вопросу
+  clearScratchpad();
+  el('scratchContainer').classList.remove('open');
+  el('scratchChevron').textContent = '▼';
+
+  state.idx++;
+  renderQuestion();
+}
+
+function quitQuiz(){
+  clearInterval(state.timer);
+  goHome();
+}
+
+/* ================= РЕЗУЛЬТАТ ================= */
+function finish(){
+  clearInterval(state.timer);
+  const total = state.count;
+  const correct = state.correct;
+  const pct = total ? Math.round(correct / total * 100) : 0;
+
+  const s = store.get();
+  const prevBest = s.best || 0;
+  s.total = (s.total || 0) + state.score;
+  s.games = (s.games || 0) + 1;
+  const isRecord = state.score > prevBest;
+  if(isRecord) s.best = state.score;
+  store.set(s);
+
+  let big, title;
+  if(pct === 100){ big='100%'; title='Идеально'; }
+  else if(pct >= 80){ big=pct+'%'; title='Отличная работа'; }
+  else if(pct >= 60){ big=pct+'%'; title='Неплохо'; }
+  else if(pct >= 40){ big=pct+'%'; title='Есть над чем работать'; }
+  else { big=pct+'%'; title='Стоит повторить теорию'; }
+
+  el('resEmoji').textContent = big;
+  el('resTitle').textContent = title;
+  el('resGrid').innerHTML = `
+    <div class="witem"><span>Верно</span><b>${correct}/${total}</b></div>
+    <div class="witem"><span>Очки</span><b>${state.score}</b></div>
+    <div class="witem"><span>Серия</span><b>${state.bestStreak}</b></div>`;
+  el('recordInfo').innerHTML = isRecord
+    ? 'Новый рекорд. Прошлый: ' + prevBest
+    : 'Рекорд: <b>' + s.best + '</b> · Всего накоплено: <b>' + s.total + '</b>';
+
+  show('s-result');
+}
+
+function replay(){ startTest(); }
+
+/* ================= СТАРТ ================= */
+renderWallet();
+</script>
+</body>
+</html>
