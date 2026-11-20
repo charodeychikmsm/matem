@@ -182,7 +182,8 @@ canvas.geo-canvas { margin-top: 15px; max-width: 100%; border-radius: 8px; }
 .candy-theory h3 { color: #fcd34d; font-size: 16px; margin-bottom: 16px; text-transform: none; letter-spacing: 0; }
 .candy-theory p { font-size: 15px; margin-bottom: 12px; line-height: 1.6; color: var(--txt); }
 .candy-theory ul { padding-left: 20px; margin-bottom: 16px; }
-.candy-theory li { background: none; border: none; padding: 0; margin-bottom: 8px; list-style-type: disc; color: var(--txt); font-family: inherit; }
+.candy-theory li { background: none; border: none; padding: 0; margin-bottom: 8px; list-style-type: disc; color: var(--txt); font-family: inherit; font-size: 15px; line-height: 1.5; }
+.candy-theory code { background: rgba(150, 150, 150, 0.2); padding: 2px 6px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 14px; }
 .candy-theory .formula { text-align: center; font-size: 18px; font-weight: bold; margin: 16px 0; color: var(--acc); }
 
 .practice { margin-top: 26px; padding-top: 22px; border-top: 1px dashed var(--line); }
@@ -769,7 +770,7 @@ geo:[
 ]
 };
 
-// Добавляем текст про Дискриминант (Коробка с конфетами)
+// Добавляем текст про Дискриминант (Коробка с конфетами) + объяснение минусов
 const candyTheoryHTML = `
 <div class="candy-theory">
   <h3>Дискриминант — это просто!</h3>
@@ -788,11 +789,17 @@ const candyTheoryHTML = `
   </ul>
   <p>Всё! Дискриминант — это просто счётчик конфет.</p>
   
-  <p><b>Пример:</b></p>
-  <p>x² + 5x + 6 = 0</p>
-  <p>Здесь: a = 1, b = 5, c = 6.</p>
-  <p>Считаем: D = 5² - 4·1·6 = 25 - 24 = 1</p>
-  <p>D = 1, значит D > 0 → две конфеты (два решения).</p>
+  <p><b>Как считать этот D и что делать с ебучим минусом:</b></p>
+  <p>Формула: <code>D = b² - 4ac</code>. Представь, что это два шага: сначала считаем <code>b²</code>, потом считаем <code>4·a·c</code>, и из первого вычитаем второе.</p>
+  <p>Самое главное правило: <b>Если в уравнении перед числом стоит минус, то это число отрицательное.</b> Например, в уравнении <code>1x² + 1x - 5 = 0</code>:<br>
+  a = 1, b = 1, c = -5.</p>
+  <p>Считаем:</p>
+  <ul>
+    <li>Шаг 1: b² = 1² = <b>1</b>.</li>
+    <li>Шаг 2: 4ac = 4 · 1 · (-5) = <b>-20</b>.</li>
+    <li>Шаг 3: Из первого вычитаем второе: 1 - (-20).</li>
+  </ul>
+  <p>Вот тут вступает правило <b>«минус на минус даёт плюс»</b>. Вычитать отрицательное число — это всё равно что прибавлять его! То есть <code>1 - (-20)</code> превращается в <code>1 + 20 = <b>21</b></code>. Ответ: 21.</p>
 </div>
 `;
 
